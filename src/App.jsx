@@ -10,7 +10,7 @@ import Placement from './pages/Placement';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import Testimonials from './pages/Testimonials';
-import Contact from './pages/Contact';
+import JobApplication from './pages/JobApplication';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './firebase';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -39,10 +39,14 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/training" element={<Training />} />
           <Route path="/placement" element={<Placement />} />
+          <Route path="/job-application/:jobId" element={
+            <ProtectedRoute>
+              <JobApplication />
+            </ProtectedRoute>
+          } />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/events" element={<Events />} />
           <Route path="/testimonials" element={<Testimonials />} />
-          <Route path="/contact" element={<Contact />} />
         </Routes>
       </Box>
       {user && <Footer />}

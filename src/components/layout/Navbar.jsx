@@ -27,8 +27,7 @@ const navItems = [
   { text: 'Placement', path: '/placement' },
   { text: 'Dashboard', path: '/dashboard' },
   { text: 'Events', path: '/events' },
-  { text: 'Testimonials', path: '/testimonials' },
-  { text: 'Contact', path: '/contact' }
+  { text: 'Testimonials', path: '/testimonials' }
 ];
 
 const Navbar = () => {

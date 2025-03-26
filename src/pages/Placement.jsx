@@ -25,6 +25,7 @@ import {
   WorkOutline as WorkOutlineIcon,
   FilterList as FilterListIcon
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const jobListings = [
   {
@@ -80,6 +81,11 @@ const jobListings = [
 const Placement = () => {
   const [jobType, setJobType] = React.useState('');
   const [experience, setExperience] = React.useState('');
+  const navigate = useNavigate();
+
+  const handleApplyNow = (jobId) => {
+    navigate(`/job-application/${jobId}`);
+  };
 
   return (
     <Box sx={{ py: 6 }}>
@@ -243,7 +249,12 @@ const Placement = () => {
                         </Typography>
                       </Box>
                       <Stack spacing={1}>
-                        <Button variant="contained" color="primary" fullWidth>
+                        <Button 
+                          variant="contained" 
+                          color="primary" 
+                          fullWidth
+                          onClick={() => handleApplyNow(job.id)}
+                        >
                           Apply Now
                         </Button>
                         <Button variant="outlined" color="primary" fullWidth>
