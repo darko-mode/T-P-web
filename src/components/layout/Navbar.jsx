@@ -15,6 +15,10 @@ import {
   useMediaQuery
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../../firebase';
+import { signOut } from 'firebase/auth';
+import { Avatar } from '@mui/material';
 
 const navItems = [
   { text: 'Home', path: '/' },
@@ -36,6 +40,7 @@ const Navbar = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const [user] = useAuthState(auth);
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
       <Typography variant="h6" sx={{ my: 2 }}>
@@ -50,6 +55,16 @@ const Navbar = () => {
       </List>
     </Box>
   );
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  if (!user) return null;
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -93,6 +108,19 @@ const Navbar = () => {
               ))}
             </Box>
           )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 2 }}>
+            <Avatar
+              src={user?.photoURL}
+              alt={user?.displayName}
+              sx={{ width: 32, height: 32 }}
+            />
+            <Typography variant="body1" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              {user?.displayName}
+            </Typography>
+            <Button color="inherit" onClick={handleLogout}>
+              Logout
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       {isMobile && (

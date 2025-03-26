@@ -11,14 +11,31 @@ import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import Testimonials from './pages/Testimonials';
 import Contact from './pages/Contact';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from './firebase';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
 
 const App = () => {
+  const [user] = useAuthState(auth);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Navbar />
+      {user && <Navbar />}
       <Box component="main" sx={{ flexGrow: 1, py: 3 }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
+          {/* Wrap other routes with ProtectedRoute */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/about" element={<About />} />
           <Route path="/training" element={<Training />} />
           <Route path="/placement" element={<Placement />} />
@@ -28,7 +45,7 @@ const App = () => {
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </Box>
-      <Footer />
+      {user && <Footer />}
     </Box>
   );
 };
