@@ -30,18 +30,19 @@ const JobApplication = () => {
   const { jobId } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     phone: '',
-    education: '',
+    position: '',
     experience: '',
+    education: '',
     skills: '',
-    coverLetter: '',
-    resume: null
+    resume: null,
+    coverLetter: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [applicationId, setApplicationId] = useState(null);
 
@@ -67,93 +68,39 @@ const JobApplication = () => {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.type !== 'application/pdf') {
-        setError('Please upload a PDF file');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setError('File size should be less than 5MB');
-        return;
-      }
-      setFormData(prev => ({
-        ...prev,
-        resume: file
-      }));
-      setError('');
-    }
+    setFormData(prev => ({
+      ...prev,
+      resume: e.target.files[0]
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setSuccess('');
+    setSuccess(false);
 
     try {
-      // Validate required fields
-      const requiredFields = ['fullName', 'email', 'phone', 'education', 'experience', 'skills', 'coverLetter'];
-      const missingFields = requiredFields.filter(field => !formData[field]);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      if (missingFields.length > 0) {
-        throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-      }
-
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        throw new Error('Please enter a valid email address');
-      }
-
-      const formDataToSend = new FormData();
-      formDataToSend.append('jobId', jobId);
-      formDataToSend.append('name', formData.fullName);
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('phone', formData.phone);
+      // Here you would typically send the data to your backend
+      console.log('Form submitted:', formData);
       
-      if (formData.resume) {
-        // Validate file type
-        if (formData.resume.type !== 'application/pdf') {
-          throw new Error('Invalid file type. Only PDF files are allowed.');
-        }
-
-        // Validate file size (5MB limit)
-        if (formData.resume.size > 5 * 1024 * 1024) {
-          throw new Error('File size too large. Maximum size is 5MB.');
-        }
-
-        formDataToSend.append('resume', formData.resume);
-      }
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-      const response = await fetch('http://localhost:5000/api/job-applications', {
-        method: 'POST',
-        body: formDataToSend,
-        signal: controller.signal
+      setSuccess(true);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        position: '',
+        experience: '',
+        education: '',
+        skills: '',
+        resume: null,
+        coverLetter: ''
       });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || 'Failed to submit application');
-      }
-
-      const data = await response.json();
-      setSuccess('Application submitted successfully!');
-      setFormData({ fullName: '', email: '', phone: '', education: '', experience: '', skills: '', coverLetter: '', resume: null });
     } catch (err) {
-      console.error('Error submitting application:', err);
-      if (err.name === 'AbortError') {
-        setError('Request timed out. Please try again.');
-      } else if (err.message === 'Failed to fetch') {
-        setError('Unable to connect to the server. Please check if the server is running and try again.');
-      } else {
-        setError(err.message || 'Failed to submit application');
-      }
+      setError('Failed to submit application. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -198,7 +145,7 @@ const JobApplication = () => {
 
         {success && (
           <Alert severity="success" sx={{ mb: 3 }}>
-            {success}
+            Application submitted successfully! We'll get back to you soon.
           </Alert>
         )}
 
@@ -253,8 +200,8 @@ const JobApplication = () => {
                         required
                         fullWidth
                         label="Full Name"
-                        name="fullName"
-                        value={formData.fullName}
+                        name="name"
+                        value={formData.name}
                         onChange={handleChange}
                         disabled={loading}
                       />
@@ -284,17 +231,18 @@ const JobApplication = () => {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth required>
-                        <InputLabel>Education Level</InputLabel>
+                        <InputLabel>Position Applied For</InputLabel>
                         <Select
-                          name="education"
-                          value={formData.education}
-                          label="Education Level"
+                          name="position"
+                          value={formData.position}
+                          label="Position Applied For"
                           onChange={handleChange}
                           disabled={loading}
                         >
-                          <MenuItem value="bachelor">Bachelor's Degree</MenuItem>
-                          <MenuItem value="master">Master's Degree</MenuItem>
-                          <MenuItem value="phd">Ph.D.</MenuItem>
+                          <MenuItem value="software_engineer">Software Engineer</MenuItem>
+                          <MenuItem value="data_scientist">Data Scientist</MenuItem>
+                          <MenuItem value="product_manager">Product Manager</MenuItem>
+                          <MenuItem value="business_analyst">Business Analyst</MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
@@ -313,11 +261,23 @@ const JobApplication = () => {
                       <TextField
                         required
                         fullWidth
-                        label="Skills (comma-separated)"
+                        label="Education"
+                        name="education"
+                        value={formData.education}
+                        onChange={handleChange}
+                        disabled={loading}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        required
+                        fullWidth
+                        label="Skills"
                         name="skills"
                         value={formData.skills}
                         onChange={handleChange}
-                        helperText="List your skills separated by commas"
+                        multiline
+                        rows={2}
                         disabled={loading}
                       />
                     </Grid>
@@ -335,30 +295,27 @@ const JobApplication = () => {
                       />
                     </Grid>
                     <Grid item xs={12}>
-                      <Box sx={{ mt: 2 }}>
+                      <Button
+                        variant="contained"
+                        component="label"
+                        fullWidth
+                        sx={{ mb: 2 }}
+                        disabled={loading}
+                      >
+                        Upload Resume
                         <input
-                          accept="application/pdf"
-                          style={{ display: 'none' }}
-                          id="resume-upload"
                           type="file"
+                          hidden
+                          accept=".pdf,.doc,.docx"
                           onChange={handleFileChange}
                           disabled={loading}
                         />
-                        <label htmlFor="resume-upload">
-                          <Button
-                            variant="outlined"
-                            component="span"
-                            disabled={loading}
-                          >
-                            Upload Resume (PDF)
-                          </Button>
-                        </label>
-                        {formData.resume && (
-                          <Typography variant="body2" sx={{ mt: 1 }}>
-                            Selected file: {formData.resume.name}
-                          </Typography>
-                        )}
-                      </Box>
+                      </Button>
+                      {formData.resume && (
+                        <Typography variant="body2" color="text.secondary">
+                          Selected file: {formData.resume.name}
+                        </Typography>
+                      )}
                     </Grid>
                     <Grid item xs={12}>
                       <Stack direction="row" spacing={2}>

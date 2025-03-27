@@ -25,35 +25,24 @@ const navItems = [
   { text: 'About', path: '/about' },
   { text: 'Training', path: '/training' },
   { text: 'Placement', path: '/placement' },
-  { text: 'Dashboard', path: '/dashboard' },
   { text: 'Events', path: '/events' },
   { text: 'Testimonials', path: '/testimonials' }
+];
+
+const loggedInNavItems = [
+  ...navItems,
+  { text: 'Dashboard', path: '/dashboard' }
 ];
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [user] = useAuthState(auth);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-
-  const [user] = useAuthState(auth);
-  const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
-      <Typography variant="h6" sx={{ my: 2 }}>
-        T&P Portal
-      </Typography>
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item.text} component={RouterLink} to={item.path}>
-            <ListItemText primary={item.text} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
 
   const handleLogout = async () => {
     try {
@@ -63,7 +52,20 @@ const Navbar = () => {
     }
   };
 
-  if (!user) return null;
+  const drawer = (
+    <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
+      <Typography variant="h6" sx={{ my: 2 }}>
+        T&P Portal
+      </Typography>
+      <List>
+        {(user ? loggedInNavItems : navItems).map((item) => (
+          <ListItem key={item.text} component={RouterLink} to={item.path}>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -95,7 +97,7 @@ const Navbar = () => {
           </Typography>
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 2 }}>
-              {navItems.map((item) => (
+              {(user ? loggedInNavItems : navItems).map((item) => (
                 <Button
                   key={item.text}
                   component={RouterLink}
@@ -108,17 +110,25 @@ const Navbar = () => {
             </Box>
           )}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, ml: 2 }}>
-            <Avatar
-              src={user?.photoURL}
-              alt={user?.displayName}
-              sx={{ width: 32, height: 32 }}
-            />
-            <Typography variant="body1" sx={{ display: { xs: 'none', sm: 'block' } }}>
-              {user?.displayName}
-            </Typography>
-            <Button color="inherit" onClick={handleLogout}>
-              Logout
-            </Button>
+            {user ? (
+              <>
+                <Avatar
+                  src={user?.photoURL}
+                  alt={user?.displayName}
+                  sx={{ width: 32, height: 32 }}
+                />
+                <Typography variant="body1" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  {user?.displayName}
+                </Typography>
+                <Button color="inherit" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button color="inherit" component={RouterLink} to="/login">
+                Login
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
